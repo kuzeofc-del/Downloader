@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +63,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+
+private val MenuBg = Color(0xF21E1E2C)
 
 @Composable
 fun BrowserScreen() {
@@ -85,21 +88,22 @@ fun BrowserScreen() {
     val detected = videoPage || hits.isNotEmpty()
 
     Column(Modifier.fillMaxSize()) {
-        // ---- address bar
-        Row(Modifier.fillMaxWidth().background(Bg).padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        // ---- address bar (glass)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { UiBus.tab.value = Tab.HOME }) { Icon(Icons.Default.Home, "Home", tint = Color.White) }
             Row(
-                Modifier.weight(1f).height(44.dp).clip(RoundedCornerShape(14.dp)).background(Card2).padding(start = 14.dp, end = 4.dp),
+                Modifier.weight(1f).height(46.dp).glass(RoundedCornerShape(23.dp)).padding(start = 16.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.weight(1f)) {
                     val shown = if (editing) field else Cookies.hostOf(url) ?: url
-                    if (shown.isEmpty()) Text("Search or type URL", color = Muted, fontSize = 15.sp)
+                    if (shown.isEmpty()) Text("Search or type URL", color = Color(0xB3FFFFFF), fontSize = 15.sp)
                     BasicTextField(
                         value = shown,
                         onValueChange = { field = it },
                         singleLine = true,
                         textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
+                        cursorBrush = SolidColor(Color.White),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
                         keyboardActions = KeyboardActions(onGo = {
                             val t = field.trim()
@@ -117,16 +121,16 @@ fun BrowserScreen() {
                     )
                 }
                 if (editing) {
-                    IconButton(onClick = { field = "" }) { Icon(Icons.Default.Close, "Clear", tint = Muted) }
+                    IconButton(onClick = { field = "" }) { Icon(Icons.Default.Close, "Clear", tint = Color(0xB3FFFFFF)) }
                 } else {
                     IconButton(onClick = { if (progress in 1..99) Browser.view?.stopLoading() else Browser.view?.reload() }) {
-                        Icon(if (progress in 1..99) Icons.Default.Close else Icons.Default.Refresh, "Reload", tint = Muted)
+                        Icon(if (progress in 1..99) Icons.Default.Close else Icons.Default.Refresh, "Reload", tint = Color(0xB3FFFFFF))
                     }
                 }
             }
             Box {
                 IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Menu", tint = Color.White) }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = Card1) {
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = MenuBg) {
                     DropdownMenuItem(
                         text = { Text("Back") }, enabled = canBack,
                         leadingIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
@@ -157,7 +161,7 @@ fun BrowserScreen() {
             if (url.isBlank()) {
                 Column(Modifier.fillMaxSize().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(60.dp))
-                    Text("Type a link or search above, or open a site from Home.", color = Muted, fontSize = 15.sp)
+                    Text("Type a link or search above, or open a site from Home.", color = Color(0xB3FFFFFF), fontSize = 15.sp)
                 }
             } else {
                 AndroidView(factory = { c -> Browser.obtain(c) }, modifier = Modifier.fillMaxSize())
