@@ -46,8 +46,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
 
 class MainActivity : ComponentActivity() {
     private val permissionLauncher =
@@ -117,7 +115,6 @@ fun AppRoot() {
     val sheet by UiBus.sheet.collectAsState()
     val items by Downloads.items.collectAsState()
     val active = items.count { it.isActive }
-    val haze = LocalHazeState.current
 
     if (overlay == "settings") {
         BackHandler { UiBus.overlay.value = null }
@@ -133,8 +130,7 @@ fun AppRoot() {
                     Modifier.fillMaxWidth().navigationBarsPadding()
                         .padding(horizontal = 24.dp, vertical = 10.dp)
                         .clip(pill)
-                        .then(if (haze != null) Modifier.hazeEffect(haze) { blurRadius = 24.dp; noiseFactor = 0f } else Modifier)
-                        .background(Color(0x66FFFFFF)).glass(pill)
+                        .background(Color(0xB3FFFFFF)).glass(pill)
                         .padding(horizontal = 6.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -157,7 +153,6 @@ fun AppRoot() {
                 Modifier
                     .padding(top = pad.calculateTopPadding(), bottom = if (underBar) 0.dp else navPad)
                     .fillMaxSize()
-                    .then(if (haze != null) Modifier.hazeSource(haze) else Modifier)
             ) {
                 CompositionLocalProvider(LocalNavBarPad provides (if (underBar) navPad else 0.dp)) {
                     when (tab) {
