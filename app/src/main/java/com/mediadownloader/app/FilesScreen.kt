@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -106,7 +108,8 @@ private fun FileList(list: List<LibItem>, empty: String) {
         }
         return
     }
-    LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)) {
+    val navPad = LocalNavBarPad.current
+    LazyColumn(contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp + navPad)) {
         items(list, key = { it.id }) { FileRow(it) }
     }
 }
@@ -184,7 +187,11 @@ private fun PinPad(onUnlock: () -> Unit) {
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(top = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    val navPad = LocalNavBarPad.current
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 28.dp, bottom = navPad),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Icon(Icons.Default.Lock, null, tint = AccentBlue, modifier = Modifier.size(40.dp))
         Spacer(Modifier.height(10.dp))
         Text(
