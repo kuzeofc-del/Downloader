@@ -10,8 +10,11 @@ import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.YoutubeDLResponse
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,6 +140,9 @@ object Downloads {
     private val totalRegex = Regex("""of\s+~?\s*([\d.]+\s*[KMGT]i?B)""")
 
     /** Alternate YouTube clients tried automatically when the default ones are bot-blocked. */
+    /** The alternate YouTube client that worked last time: tried first, so we skip the runs that fail. */
+    @Volatile private var goodYtArgs: String? = null
+
     private val ALT_CLIENTS = listOf(
         "youtube:player_client=tv_simply,web_safari,mweb",
         "youtube:player_client=android_vr,web_embedded,tv",
@@ -202,11 +208,11 @@ object Downloads {
 
     private fun isYoutube(url: String) = Cookies.siteFor(url)?.key == "youtube"
 
-    private fun addCommon(req: YoutubeDLRequest, runDir: File, url: String, referer: String?, extractorArgs: String?) {
+    private fun addCommon(req: YoutubeDLRequest, runDir: File, url: String, referer: String?, extractorArgs: String?, retries: Int = 10) {
         extractorArgs?.let { req.addOption("--extractor-args", it) }
         req.addOption("--cache-dir", File(appCtx.cacheDir, "ytdlp-cache").absolutePath)
         req.addOption("--no-warnings")
-        req.addOption("--retries", 10)
+        req.addOption("--retries", retries)
         req.addOption("--socket-timeout", 20)
         if (referer != null && referer != url) {
             req.addOption("--referer", referer)
@@ -226,13 +232,17 @@ object Downloads {
         val attempts = buildList<String?> {
             // Token captured while the video played in the built-in browser (best chance)
             if (yt) YtTokens.forUrl(url)?.let { add("youtube:player_client=mweb;po_token=mweb.gvs+$it") }
+            if (yt) goodYtArgs?.let { add(it) }
             add(null)
             if (yt) addAll(ALT_CLIENTS)
-        }
+        }.distinct()
         var last: Throwable? = null
         for ((i, args) in attempts.withIndex()) {
             try {
-                return YoutubeDL.getInstance().execute(build(args), pid, false, callback)
+                val r = YoutubeDL.getInstance().execute(build(args), pid, false, callback)
+                if (yt && args != null && args in ALT_CLIENTS) goodYtArgs = args
+                else if (yt && args == null) goodYtArgs = null
+                return r
             } catch (e: YoutubeDL.CanceledException) {
                 throw e
             } catch (e: InterruptedException) {
@@ -250,7 +260,31 @@ object Downloads {
 
     // ================================================================= info / quality list
 
+    private val infoCache = ConcurrentHashMap<String, Pair<Long, MediaInfo>>()
+    private val inflight = ConcurrentHashMap<String, Deferred<MediaInfo>>()
+    private const val INFO_TTL_MS = 10 * 60 * 1000L
+
+    /** Quality list: instant if we already asked recently; shares a request that is already running. */
     suspend fun loadInfo(url: String, referer: String?): MediaInfo {
+        val key = "$url|${referer ?: ""}"
+        infoCache[key]?.let { (t, i) -> if (System.currentTimeMillis() - t < INFO_TTL_MS) return i }
+        val job = synchronized(inflight) {
+            inflight[key] ?: scope.async(start = CoroutineStart.LAZY) { loadInfoNow(url, referer) }.also { inflight[key] = it }
+        }
+        job.invokeOnCompletion { if (inflight[key] === job) inflight.remove(key) }
+        job.start()
+        val info = job.await()
+        infoCache[key] = System.currentTimeMillis() to info
+        return info
+    }
+
+    /** Warm up the quality list in the background (e.g. when a link is copied) so the sheet opens faster. */
+    fun prefetch(url: String) {
+        if (!::appCtx.isInitialized) return
+        scope.launch { try { loadInfo(url, null) } catch (_: Throwable) {} }
+    }
+
+    private suspend fun loadInfoNow(url: String, referer: String?): MediaInfo {
         if (isDrmSite(url)) {
             throw InfoException(
                 "This service locks its videos with DRM (like Netflix and Prime Video), so no downloader can save them. " +
@@ -269,7 +303,7 @@ object Downloads {
                             addOption("-J")
                             addOption("--flat-playlist")
                             addOption("--no-playlist")
-                            addCommon(this, dir, url, referer, args)
+                            addCommon(this, dir, url, referer, args, retries = 3)
                         }
                     }, pid, null)
                 }
@@ -364,7 +398,7 @@ object Downloads {
         return out
     }
 
-    // ================================================================= downloads
+        // ================================================================= downloads
 
     fun enqueue(
         ctx: Context, url: String, option: QualityOption, playlist: Boolean = false, info: MediaInfo? = null,
@@ -486,7 +520,8 @@ object Downloads {
                     addOption(if (item.playlist) "--yes-playlist" else "--no-playlist")
                     addOption("--windows-filenames")
                     addOption("--no-mtime")
-                    addOption("--concurrent-fragments", 8)
+                    addOption("--concurrent-fragments", 16)
+                    addOption("--buffer-size", "512K")
                     addOption("--http-chunk-size", "10M")
                     addOption("--fragment-retries", 10)
                     addCommon(this, tmp, item.url, item.referer, args)
@@ -595,4 +630,5 @@ object Downloads {
     private suspend fun toast(msg: String) = withContext(Dispatchers.Main) {
         Toast.makeText(appCtx, msg, Toast.LENGTH_SHORT).show()
     }
-}
+                                   }
+                                   
