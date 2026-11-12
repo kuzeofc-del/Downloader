@@ -44,8 +44,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val MenuBg = Color(0xF21E1E2C)
-private val SoftText = Color(0xB3FFFFFF)
+private val MenuBg = Color(0xF5FFFFFF)
+private val SoftText = Color(0xFF5B6070)
+private val EmptyIcon = Color(0x5994A3C7)
 
 @Composable
 fun DownloadsScreen() {
@@ -54,13 +55,13 @@ fun DownloadsScreen() {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Download", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
             if (items.any { !it.isActive }) {
-                IconButton(onClick = { Downloads.clearFinished() }) { Icon(Icons.Default.DeleteSweep, "Clear finished", tint = Color.White) }
+                IconButton(onClick = { Downloads.clearFinished() }) { Icon(Icons.Default.DeleteSweep, "Clear finished", tint = InkColor) }
             }
         }
         if (items.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(Modifier.height(60.dp))
-                Icon(Icons.Default.Download, null, tint = Color(0x40FFFFFF), modifier = Modifier.size(90.dp))
+                Icon(Icons.Default.Download, null, tint = EmptyIcon, modifier = Modifier.size(90.dp))
                 Spacer(Modifier.height(12.dp))
                 Text("No downloads yet", color = SoftText, fontSize = 16.sp)
                 Text("Finished files appear in the Files tab", color = SoftText, fontSize = 13.sp)
@@ -104,10 +105,10 @@ private fun DownloadRow(item: DownloadItem) {
                 Spacer(Modifier.height(6.dp))
                 when {
                     item.status == Status.DOWNLOADING && item.progress > 0f ->
-                        LinearProgressIndicator(progress = { item.progress / 100f }, color = Orange, trackColor = Card2,
+                        LinearProgressIndicator(progress = { item.progress / 100f }, color = AccentBlue, trackColor = TrackColor,
                             modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)))
                     item.isActive ->
-                        LinearProgressIndicator(color = Orange, trackColor = Card2,
+                        LinearProgressIndicator(color = AccentBlue, trackColor = TrackColor,
                             modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)))
                 }
             }
@@ -131,12 +132,12 @@ private fun DownloadRow(item: DownloadItem) {
         }
         if (item.status == Status.FAILED) {
             Spacer(Modifier.height(8.dp))
-            Text(item.error ?: "Failed", color = Color(0xFFFF8A80), fontSize = 13.sp)
+            Text(item.error ?: "Failed", color = DangerRed, fontSize = 13.sp)
             if (showDetail && item.errorDetail != null) {
                 Text(item.errorDetail, color = SoftText, fontSize = 11.sp,
                     modifier = Modifier.padding(top = 6.dp).fillMaxWidth().background(Card2, RoundedCornerShape(12.dp)).padding(8.dp))
             } else if (item.errorDetail != null) {
-                Text("Tap to see details", color = Orange, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                Text("Tap to see details", color = AccentBlue, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
             }
         }
     }
@@ -161,7 +162,7 @@ private fun rightText(i: DownloadItem) = when (i.status) {
 
 private fun statusColor(i: DownloadItem) = when (i.status) {
     Status.DONE -> Good
-    Status.FAILED -> Color(0xFFFF8A80)
-    Status.DOWNLOADING -> Color.White
+    Status.FAILED -> DangerRed
+    Status.DOWNLOADING -> InkColor
     else -> SoftText
 }
