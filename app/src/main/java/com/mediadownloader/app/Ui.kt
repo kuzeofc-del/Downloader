@@ -22,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,9 +32,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 
 // ---- Colores del tema claro ----
 val AccentBlue = Color(0xFF007AFF)      // Acento principal (azul iOS)
@@ -49,6 +54,12 @@ val Good = Color(0xFF22A559)
 val DangerRed = Color(0xFFD93025)
 val TrackColor = Color(0x3394A3C7)
 
+/** Estado del desenfoque (Haze). Lo comparte el fondo, el contenido y la barra inferior. */
+val LocalHazeState = compositionLocalOf<HazeState?> { null }
+
+/** Alto de la barra inferior flotante: las listas lo usan como espacio extra al final. */
+val LocalNavBarPad = compositionLocalOf { 0.dp }
+
 /** Efecto cristal claro: blanco translúcido con borde sutil. */
 fun Modifier.glass(shape: Shape = RoundedCornerShape(22.dp)): Modifier = this
     .clip(shape)
@@ -57,6 +68,7 @@ fun Modifier.glass(shape: Shape = RoundedCornerShape(22.dp)): Modifier = this
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
+    val hazeState = remember { HazeState() }
     MaterialTheme(
         colorScheme = lightColorScheme(
             primary = AccentBlue, onPrimary = Color.White,
@@ -73,12 +85,18 @@ fun AppTheme(content: @Composable () -> Unit) {
         ),
     ) {
         // Fondo con degradado pastel detrás de todas las pantallas (así el cristal se nota)
-        Box(
-            Modifier.fillMaxSize().background(
-                Brush.linearGradient(listOf(Color(0xFFD6E6FF), Color(0xFFE6DCFF), Color(0xFFD3F3EE)))
+        Box(Modifier.fillMaxSize()) {
+            // El fondo es "fuente" del desenfoque (hermano del contenido, no su padre)
+            Box(
+                Modifier.fillMaxSize().hazeSource(hazeState).background(
+                    Brush.linearGradient(listOf(Color(0xFFD6E6FF), Color(0xFFE6DCFF), Color(0xFFD3F3EE)))
+                )
             )
-        ) {
-            CompositionLocalProvider(LocalContentColor provides InkColor, content = content)
+            CompositionLocalProvider(
+                LocalContentColor provides InkColor,
+                LocalHazeState provides hazeState,
+                content = content,
+            )
         }
     }
 }
