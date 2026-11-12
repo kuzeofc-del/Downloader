@@ -19,7 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -34,46 +34,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
-val Orange = Color(0xFFFF6A13)
-val OrangeSoft = Color(0xFFFF8A3D)
+// ---- Colores del tema claro ----
+val AccentBlue = Color(0xFF007AFF)      // Acento principal (azul iOS)
+val InkColor = Color(0xFF1C1C28)        // Texto e íconos oscuros
+val Orange = AccentBlue                 // Nombre viejo: otros archivos aún lo usan, ahora es azul
+val OrangeSoft = Color(0xFF5AA9FF)
 val Gold = Color(0xFFFFB627)
-val Bg = Color(0xFF0B0B14)
-val Card1 = Color(0x33FFFFFF)
-val Card2 = Color(0x26FFFFFF)
-val GlassBorder = Color(0x40FFFFFF)
-val Muted = Color(0xFFB0B0BA)
-val Good = Color(0xFF3DDC84)
+val Bg = Color(0xFFEAF1FF)
+val Card1 = Color(0x99FFFFFF)
+val Card2 = Color(0x66FFFFFF)
+val GlassBorder = Color(0x4D94A3C7)
+val Muted = Color(0xFF5B6070)
+val Good = Color(0xFF22A559)
+val DangerRed = Color(0xFFD93025)
+val TrackColor = Color(0x3394A3C7)
 
-/** Efecto cristal: relleno translúcido con brillo y borde fino. */
+/** Efecto cristal claro: blanco translúcido con borde sutil. */
 fun Modifier.glass(shape: Shape = RoundedCornerShape(22.dp)): Modifier = this
     .clip(shape)
-    .background(Brush.verticalGradient(listOf(Color(0x40FFFFFF), Color(0x14FFFFFF))))
-    .border(1.dp, Brush.verticalGradient(listOf(Color(0x66FFFFFF), Color(0x1AFFFFFF))), shape)
+    .background(Brush.verticalGradient(listOf(Color(0xB3FFFFFF), Color(0x66FFFFFF))))
+    .border(1.dp, Brush.verticalGradient(listOf(Color(0xE6FFFFFF), Color(0x4D94A3C7))), shape)
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = Orange, onPrimary = Color.White,
-            primaryContainer = Color(0xFF3A1E0C), onPrimaryContainer = OrangeSoft,
-            secondary = Gold, onSecondary = Color.Black,
-            secondaryContainer = Color(0xFF3A1E0C), onSecondaryContainer = OrangeSoft,
-            background = Color.Transparent, onBackground = Color(0xFFF2F2F2),
-            surface = Color.Transparent, onSurface = Color(0xFFF2F2F2),
+        colorScheme = lightColorScheme(
+            primary = AccentBlue, onPrimary = Color.White,
+            primaryContainer = Color(0xFFD6E8FF), onPrimaryContainer = Color(0xFF004A99),
+            secondary = Color(0xFF5856D6), onSecondary = Color.White,
+            secondaryContainer = Color(0xFFE3E2FA), onSecondaryContainer = Color(0xFF2E2D80),
+            background = Color.Transparent, onBackground = InkColor,
+            surface = Color.Transparent, onSurface = InkColor,
             surfaceVariant = Card2, onSurfaceVariant = Muted,
-            surfaceContainer = Card1, surfaceContainerHigh = Color(0xCC1E1E2C), surfaceContainerHighest = Color(0xE6262636),
+            surfaceContainer = Card1, surfaceContainerHigh = Color(0xF2FFFFFF), surfaceContainerHighest = Color(0xF7FFFFFF),
             surfaceContainerLow = Card1, surfaceContainerLowest = Color.Transparent,
-            outline = GlassBorder, outlineVariant = Color(0x26FFFFFF),
-            error = Color(0xFFFF6B6B),
+            outline = Color(0xFF8A94A8), outlineVariant = Color(0x3394A3C7),
+            error = DangerRed,
         ),
     ) {
-        // Fondo con degradado detrás de todas las pantallas (así el cristal se nota)
+        // Fondo con degradado pastel detrás de todas las pantallas (así el cristal se nota)
         Box(
             Modifier.fillMaxSize().background(
-                Brush.linearGradient(listOf(Bg, Color(0xFF1A1033), Color(0xFF0D2238)))
+                Brush.linearGradient(listOf(Color(0xFFD6E6FF), Color(0xFFE6DCFF), Color(0xFFD3F3EE)))
             )
         ) {
-            CompositionLocalProvider(LocalContentColor provides Color(0xFFF2F2F2), content = content)
+            CompositionLocalProvider(LocalContentColor provides InkColor, content = content)
         }
     }
 }
@@ -86,13 +91,13 @@ fun Thumb(model: Any?, audio: Boolean, durationSec: Long, modifier: Modifier) {
             AsyncImage(model = model, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         }
         if (model == null && audio) {
-            Icon(Icons.Default.MusicNote, null, tint = Orange, modifier = Modifier.align(Alignment.Center).size(28.dp))
+            Icon(Icons.Default.MusicNote, null, tint = AccentBlue, modifier = Modifier.align(Alignment.Center).size(28.dp))
         }
         if (durationSec > 0 || !audio) {
             Box(
                 Modifier.align(Alignment.BottomStart).padding(5.dp)
                     .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
-                    .border(0.5.dp, GlassBorder, RoundedCornerShape(8.dp))
+                    .border(0.5.dp, Color(0x40FFFFFF), RoundedCornerShape(8.dp))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
