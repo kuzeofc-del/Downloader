@@ -58,6 +58,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private val MenuBg = Color(0xF21E1E2C)
+private val SoftText = Color(0xB3FFFFFF)
+
 /** Vault stays unlocked only while you stay on this screen. */
 private object VaultSession { var unlocked = false }
 
@@ -70,15 +73,15 @@ fun FilesScreen() {
     Column(Modifier.fillMaxSize()) {
         Text("Files", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 20.dp, top = 14.dp, bottom = 8.dp))
         TabRow(
-            selectedTabIndex = tab, containerColor = Bg, contentColor = Orange,
+            selectedTabIndex = tab, containerColor = Color.Transparent, contentColor = Orange,
             indicator = { pos -> TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(pos[tab]), color = Orange, height = 3.dp) },
-            divider = { HorizontalDivider(color = Card2) },
+            divider = { HorizontalDivider(color = GlassBorder) },
         ) {
             listOf("Video", "Audio", "🔒 Private").forEachIndexed { i, t ->
                 Tab(selected = tab == i, onClick = {
                     tab = i
                     if (i != 2) { VaultSession.unlocked = false; unlocked = false }
-                }, text = { Text(t, color = if (tab == i) Orange else Muted, fontSize = 15.sp) })
+                }, text = { Text(t, color = if (tab == i) Orange else SoftText, fontSize = 15.sp) })
             }
         }
         when (tab) {
@@ -95,9 +98,9 @@ private fun FileList(list: List<LibItem>, empty: String) {
     if (list.isEmpty()) {
         Column(Modifier.fillMaxSize().padding(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(50.dp))
-            Icon(Icons.Default.VideoLibrary, null, tint = Card2, modifier = Modifier.size(84.dp))
+            Icon(Icons.Default.VideoLibrary, null, tint = Color(0x40FFFFFF), modifier = Modifier.size(84.dp))
             Spacer(Modifier.height(12.dp))
-            Text(empty, color = Muted, fontSize = 15.sp)
+            Text(empty, color = SoftText, fontSize = 15.sp)
         }
         return
     }
@@ -114,7 +117,7 @@ private fun FileRow(item: LibItem) {
     var menu by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     Row(
-        Modifier.fillMaxWidth().padding(vertical = 5.dp).clip(RoundedCornerShape(14.dp)).background(Card1)
+        Modifier.fillMaxWidth().padding(vertical = 5.dp).glass(RoundedCornerShape(22.dp))
             .clickable { play(ctx, item.playUri(), item.title) }.padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -124,11 +127,11 @@ private fun FileRow(item: LibItem) {
         Column(Modifier.weight(1f)) {
             Text(item.title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(4.dp))
-            Text("${humanSize(item.size)} • ${dateFmt.format(Date(item.date))}", color = Muted, fontSize = 12.sp)
+            Text("${humanSize(item.size)} • ${dateFmt.format(Date(item.date))}", color = SoftText, fontSize = 12.sp)
         }
         Box {
-            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null, tint = Muted) }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = Card2) {
+            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null, tint = SoftText) }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = MenuBg) {
                 DropdownMenuItem(text = { Text("Play") }, onClick = { menu = false; play(ctx, item.playUri(), item.title) })
                 if (!item.vault) {
                     item.uri?.let { u ->
@@ -153,7 +156,7 @@ private fun FileRow(item: LibItem) {
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            containerColor = Card1,
+            containerColor = MenuBg,
             title = { Text("Delete this file?") },
             text = { Text("\"${item.title}\" will be removed from your phone.") },
             confirmButton = { TextButton(onClick = { confirmDelete = false; Library.delete(item) }) { Text("Delete", color = Orange) } },
@@ -194,7 +197,7 @@ private fun PinPad(onUnlock: () -> Unit) {
         Spacer(Modifier.height(18.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
             repeat(4) { i ->
-                Box(Modifier.size(14.dp).clip(CircleShape).background(if (i < pin.length) Orange else Color(0xFF3A3A40)))
+                Box(Modifier.size(14.dp).clip(CircleShape).background(if (i < pin.length) Orange else Color(0x55FFFFFF)))
             }
         }
         Spacer(Modifier.height(26.dp))
@@ -203,8 +206,8 @@ private fun PinPad(onUnlock: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(18.dp), modifier = Modifier.padding(vertical = 8.dp)) {
                 row.forEach { k ->
                     Box(
-                        Modifier.size(76.dp).clip(RoundedCornerShape(20.dp))
-                            .background(if (k.isEmpty()) Color.Transparent else Card1)
+                        Modifier.size(76.dp)
+                            .then(if (k.isEmpty()) Modifier else Modifier.glass(RoundedCornerShape(38.dp)))
                             .clickable(enabled = k.isNotEmpty()) {
                                 error = false
                                 if (k == "⌫") pin = pin.dropLast(1)
