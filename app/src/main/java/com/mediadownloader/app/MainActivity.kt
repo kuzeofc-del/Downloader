@@ -85,6 +85,7 @@ class MainActivity : ComponentActivity() {
         if (prefs.getString("last_clip", null) == url) return
         prefs.edit().putString("last_clip", url).apply()
         UiBus.clipUrl.value = url
+        Downloads.prefetch(url)
     }
 
     private fun handleIntent(intent: Intent?) {
