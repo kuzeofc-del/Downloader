@@ -196,6 +196,7 @@ fun HomeScreen() {
             "$engine  •  Save: Download/$SAVE_FOLDER",
             color = GlassText, fontSize = 11.sp, modifier = Modifier.padding(vertical = 14.dp),
         )
+        Spacer(Modifier.height(LocalNavBarPad.current))
     }
 
     if (showAdd) AddShortcutDialog(onDismiss = { showAdd = false }) { s ->
