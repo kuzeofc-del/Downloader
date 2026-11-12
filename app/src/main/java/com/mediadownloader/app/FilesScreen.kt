@@ -58,8 +58,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val MenuBg = Color(0xF21E1E2C)
-private val SoftText = Color(0xB3FFFFFF)
+private val MenuBg = Color(0xF5FFFFFF)
+private val SoftText = Color(0xFF5B6070)
+private val EmptyIcon = Color(0x5994A3C7)
+private val PinEmptyDot = Color(0x6694A3C7)
 
 /** Vault stays unlocked only while you stay on this screen. */
 private object VaultSession { var unlocked = false }
@@ -73,15 +75,15 @@ fun FilesScreen() {
     Column(Modifier.fillMaxSize()) {
         Text("Files", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 20.dp, top = 14.dp, bottom = 8.dp))
         TabRow(
-            selectedTabIndex = tab, containerColor = Color.Transparent, contentColor = Orange,
-            indicator = { pos -> TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(pos[tab]), color = Orange, height = 3.dp) },
+            selectedTabIndex = tab, containerColor = Color.Transparent, contentColor = AccentBlue,
+            indicator = { pos -> TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(pos[tab]), color = AccentBlue, height = 3.dp) },
             divider = { HorizontalDivider(color = GlassBorder) },
         ) {
             listOf("Video", "Audio", "🔒 Private").forEachIndexed { i, t ->
                 Tab(selected = tab == i, onClick = {
                     tab = i
                     if (i != 2) { VaultSession.unlocked = false; unlocked = false }
-                }, text = { Text(t, color = if (tab == i) Orange else SoftText, fontSize = 15.sp) })
+                }, text = { Text(t, color = if (tab == i) AccentBlue else SoftText, fontSize = 15.sp) })
             }
         }
         when (tab) {
@@ -98,7 +100,7 @@ private fun FileList(list: List<LibItem>, empty: String) {
     if (list.isEmpty()) {
         Column(Modifier.fillMaxSize().padding(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(50.dp))
-            Icon(Icons.Default.VideoLibrary, null, tint = Color(0x40FFFFFF), modifier = Modifier.size(84.dp))
+            Icon(Icons.Default.VideoLibrary, null, tint = EmptyIcon, modifier = Modifier.size(84.dp))
             Spacer(Modifier.height(12.dp))
             Text(empty, color = SoftText, fontSize = 15.sp)
         }
@@ -149,7 +151,7 @@ private fun FileRow(item: LibItem) {
                 item.source?.let { src ->
                     DropdownMenuItem(text = { Text("Open source page") }, onClick = { menu = false; UiBus.openBrowser(src) })
                 }
-                DropdownMenuItem(text = { Text("Delete", color = Color(0xFFFF8A80)) }, onClick = { menu = false; confirmDelete = true })
+                DropdownMenuItem(text = { Text("Delete", color = DangerRed) }, onClick = { menu = false; confirmDelete = true })
             }
         }
     }
@@ -159,8 +161,8 @@ private fun FileRow(item: LibItem) {
             containerColor = MenuBg,
             title = { Text("Delete this file?") },
             text = { Text("\"${item.title}\" will be removed from your phone.") },
-            confirmButton = { TextButton(onClick = { confirmDelete = false; Library.delete(item) }) { Text("Delete", color = Orange) } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+            confirmButton = { TextButton(onClick = { confirmDelete = false; Library.delete(item) }) { Text("Delete", color = DangerRed) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel", color = SoftText) } },
         )
     }
 }
@@ -183,7 +185,7 @@ private fun PinPad(onUnlock: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize().padding(top = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(Icons.Default.Lock, null, tint = Gold, modifier = Modifier.size(40.dp))
+        Icon(Icons.Default.Lock, null, tint = AccentBlue, modifier = Modifier.size(40.dp))
         Spacer(Modifier.height(10.dp))
         Text(
             when {
@@ -193,11 +195,11 @@ private fun PinPad(onUnlock: () -> Unit) {
             },
             fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
         )
-        if (error) Text(if (creating) "PINs didn't match, try again" else "Wrong PIN", color = Color(0xFFFF8A80), fontSize = 13.sp)
+        if (error) Text(if (creating) "PINs didn't match, try again" else "Wrong PIN", color = DangerRed, fontSize = 13.sp)
         Spacer(Modifier.height(18.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
             repeat(4) { i ->
-                Box(Modifier.size(14.dp).clip(CircleShape).background(if (i < pin.length) Orange else Color(0x55FFFFFF)))
+                Box(Modifier.size(14.dp).clip(CircleShape).background(if (i < pin.length) AccentBlue else PinEmptyDot))
             }
         }
         Spacer(Modifier.height(26.dp))
@@ -218,7 +220,7 @@ private fun PinPad(onUnlock: () -> Unit) {
                             },
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (k == "⌫") Icon(Icons.AutoMirrored.Filled.Backspace, "Delete", tint = Color.White)
+                        if (k == "⌫") Icon(Icons.AutoMirrored.Filled.Backspace, "Delete", tint = InkColor)
                         else Text(k, fontSize = 28.sp, fontWeight = FontWeight.Medium)
                     }
                 }
