@@ -36,8 +36,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 
 // ---- Colores del tema claro ----
 val AccentBlue = Color(0xFF007AFF)      // Acento principal (azul iOS)
@@ -54,8 +52,6 @@ val Good = Color(0xFF22A559)
 val DangerRed = Color(0xFFD93025)
 val TrackColor = Color(0x3394A3C7)
 
-/** Estado del desenfoque (Haze). Lo comparte el fondo, el contenido y la barra inferior. */
-val LocalHazeState = compositionLocalOf<HazeState?> { null }
 
 /** Alto de la barra inferior flotante: las listas lo usan como espacio extra al final. */
 val LocalNavBarPad = compositionLocalOf { 0.dp }
@@ -68,7 +64,6 @@ fun Modifier.glass(shape: Shape = RoundedCornerShape(22.dp)): Modifier = this
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
-    val hazeState = remember { HazeState() }
     MaterialTheme(
         colorScheme = lightColorScheme(
             primary = AccentBlue, onPrimary = Color.White,
@@ -86,15 +81,13 @@ fun AppTheme(content: @Composable () -> Unit) {
     ) {
         // Fondo con degradado pastel detrás de todas las pantallas (así el cristal se nota)
         Box(Modifier.fillMaxSize()) {
-            // El fondo es "fuente" del desenfoque (hermano del contenido, no su padre)
             Box(
-                Modifier.fillMaxSize().hazeSource(hazeState).background(
+                Modifier.fillMaxSize().background(
                     Brush.linearGradient(listOf(Color(0xFFD6E6FF), Color(0xFFE6DCFF), Color(0xFFD3F3EE)))
                 )
             )
             CompositionLocalProvider(
                 LocalContentColor provides InkColor,
-                LocalHazeState provides hazeState,
                 content = content,
             )
         }
