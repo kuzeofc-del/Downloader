@@ -67,7 +67,7 @@ fun AppTheme(content: @Composable () -> Unit) {
             surface = Color.Transparent, onSurface = InkColor,
             surfaceVariant = Card2, onSurfaceVariant = Muted,
             surfaceContainer = Card1, surfaceContainerHigh = Color(0xF2FFFFFF), surfaceContainerHighest = Color(0xF7FFFFFF),
-            surfaceContainerLow = Card1, surfaceContainerLowest = Color.Transparent,
+            surfaceContainerLow = Color(0xFAF4F7FF), surfaceContainerLowest = Color.Transparent,
             outline = Color(0xFF8A94A8), outlineVariant = Color(0x3394A3C7),
             error = DangerRed,
         ),
