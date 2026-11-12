@@ -44,6 +44,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private val MenuBg = Color(0xF21E1E2C)
+private val SoftText = Color(0xB3FFFFFF)
+
 @Composable
 fun DownloadsScreen() {
     val items by Downloads.items.collectAsState()
@@ -51,16 +54,16 @@ fun DownloadsScreen() {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Download", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
             if (items.any { !it.isActive }) {
-                IconButton(onClick = { Downloads.clearFinished() }) { Icon(Icons.Default.DeleteSweep, "Clear finished", tint = Muted) }
+                IconButton(onClick = { Downloads.clearFinished() }) { Icon(Icons.Default.DeleteSweep, "Clear finished", tint = Color.White) }
             }
         }
         if (items.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(Modifier.height(60.dp))
-                Icon(Icons.Default.Download, null, tint = Card2, modifier = Modifier.size(90.dp))
+                Icon(Icons.Default.Download, null, tint = Color(0x40FFFFFF), modifier = Modifier.size(90.dp))
                 Spacer(Modifier.height(12.dp))
-                Text("No downloads yet", color = Muted, fontSize = 16.sp)
-                Text("Finished files appear in the Files tab", color = Muted, fontSize = 13.sp)
+                Text("No downloads yet", color = SoftText, fontSize = 16.sp)
+                Text("Finished files appear in the Files tab", color = SoftText, fontSize = 13.sp)
             }
         } else {
             LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
@@ -76,7 +79,7 @@ private fun DownloadRow(item: DownloadItem) {
     var menu by remember { mutableStateOf(false) }
     var showDetail by remember { mutableStateOf(false) }
     Column(
-        Modifier.fillMaxWidth().padding(vertical = 5.dp).clip(RoundedCornerShape(14.dp)).background(Card1)
+        Modifier.fillMaxWidth().padding(vertical = 5.dp).glass(RoundedCornerShape(22.dp))
             .clickable {
                 when (item.status) {
                     Status.DONE -> item.files.firstOrNull()?.let { play(ctx, Uri.parse(it.uri), item.title) }
@@ -95,7 +98,7 @@ private fun DownloadRow(item: DownloadItem) {
                 Row {
                     Text(leftText(item), color = statusColor(item), fontSize = 13.sp, maxLines = 1)
                     Spacer(Modifier.weight(1f))
-                    Text(rightText(item), color = Muted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    Text(rightText(item), color = SoftText, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(start = 8.dp).widthIn(max = 130.dp))
                 }
                 Spacer(Modifier.height(6.dp))
@@ -109,8 +112,8 @@ private fun DownloadRow(item: DownloadItem) {
                 }
             }
             Box {
-                IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null, tint = Muted) }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = Card2) {
+                IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null, tint = SoftText) }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = MenuBg) {
                     if (item.isActive) DropdownMenuItem(text = { Text("Cancel") }, onClick = { menu = false; Downloads.cancel(item.id) })
                     if (item.status == Status.FAILED || item.status == Status.CANCELLED) {
                         DropdownMenuItem(text = { Text("Retry") }, onClick = { menu = false; Downloads.retry(ctx, item.id) })
@@ -130,8 +133,8 @@ private fun DownloadRow(item: DownloadItem) {
             Spacer(Modifier.height(8.dp))
             Text(item.error ?: "Failed", color = Color(0xFFFF8A80), fontSize = 13.sp)
             if (showDetail && item.errorDetail != null) {
-                Text(item.errorDetail, color = Muted, fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 6.dp).fillMaxWidth().background(Card2, RoundedCornerShape(8.dp)).padding(8.dp))
+                Text(item.errorDetail, color = SoftText, fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 6.dp).fillMaxWidth().background(Card2, RoundedCornerShape(12.dp)).padding(8.dp))
             } else if (item.errorDetail != null) {
                 Text("Tap to see details", color = Orange, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
             }
@@ -160,5 +163,5 @@ private fun statusColor(i: DownloadItem) = when (i.status) {
     Status.DONE -> Good
     Status.FAILED -> Color(0xFFFF8A80)
     Status.DOWNLOADING -> Color.White
-    else -> Muted
+    else -> SoftText
 }
