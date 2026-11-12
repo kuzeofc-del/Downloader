@@ -64,7 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 
-private val MenuBg = Color(0xF21E1E2C)
+private val MenuBg = Color(0xF5FFFFFF)
+private val SoftText = Color(0xFF5B6070)
 
 @Composable
 fun BrowserScreen() {
@@ -90,20 +91,20 @@ fun BrowserScreen() {
     Column(Modifier.fillMaxSize()) {
         // ---- address bar (glass)
         Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { UiBus.tab.value = Tab.HOME }) { Icon(Icons.Default.Home, "Home", tint = Color.White) }
+            IconButton(onClick = { UiBus.tab.value = Tab.HOME }) { Icon(Icons.Default.Home, "Home", tint = InkColor) }
             Row(
                 Modifier.weight(1f).height(46.dp).glass(RoundedCornerShape(23.dp)).padding(start = 16.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.weight(1f)) {
                     val shown = if (editing) field else Cookies.hostOf(url) ?: url
-                    if (shown.isEmpty()) Text("Search or type URL", color = Color(0xB3FFFFFF), fontSize = 15.sp)
+                    if (shown.isEmpty()) Text("Search or type URL", color = SoftText, fontSize = 15.sp)
                     BasicTextField(
                         value = shown,
                         onValueChange = { field = it },
                         singleLine = true,
-                        textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
-                        cursorBrush = SolidColor(Color.White),
+                        textStyle = TextStyle(color = InkColor, fontSize = 15.sp),
+                        cursorBrush = SolidColor(AccentBlue),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
                         keyboardActions = KeyboardActions(onGo = {
                             val t = field.trim()
@@ -121,15 +122,15 @@ fun BrowserScreen() {
                     )
                 }
                 if (editing) {
-                    IconButton(onClick = { field = "" }) { Icon(Icons.Default.Close, "Clear", tint = Color(0xB3FFFFFF)) }
+                    IconButton(onClick = { field = "" }) { Icon(Icons.Default.Close, "Clear", tint = SoftText) }
                 } else {
                     IconButton(onClick = { if (progress in 1..99) Browser.view?.stopLoading() else Browser.view?.reload() }) {
-                        Icon(if (progress in 1..99) Icons.Default.Close else Icons.Default.Refresh, "Reload", tint = Color(0xB3FFFFFF))
+                        Icon(if (progress in 1..99) Icons.Default.Close else Icons.Default.Refresh, "Reload", tint = SoftText)
                     }
                 }
             }
             Box {
-                IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Menu", tint = Color.White) }
+                IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Menu", tint = InkColor) }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }, containerColor = MenuBg) {
                     DropdownMenuItem(
                         text = { Text("Back") }, enabled = canBack,
@@ -153,7 +154,7 @@ fun BrowserScreen() {
             }
         }
         if (progress in 1..99) {
-            LinearProgressIndicator(progress = { progress / 100f }, color = Orange, trackColor = Card2, modifier = Modifier.fillMaxWidth().height(2.dp))
+            LinearProgressIndicator(progress = { progress / 100f }, color = AccentBlue, trackColor = TrackColor, modifier = Modifier.fillMaxWidth().height(2.dp))
         }
 
         // ---- page + floating download button
@@ -161,7 +162,7 @@ fun BrowserScreen() {
             if (url.isBlank()) {
                 Column(Modifier.fillMaxSize().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(60.dp))
-                    Text("Type a link or search above, or open a site from Home.", color = Color(0xB3FFFFFF), fontSize = 15.sp)
+                    Text("Type a link or search above, or open a site from Home.", color = SoftText, fontSize = 15.sp)
                 }
             } else {
                 AndroidView(factory = { c -> Browser.obtain(c) }, modifier = Modifier.fillMaxSize())
@@ -189,9 +190,9 @@ private fun DownloadFab(detected: Boolean, modifier: Modifier, onClick: () -> Un
     Box(modifier) {
         Box(
             Modifier.scale(scale).size(62.dp)
-                .shadow(14.dp, CircleShape, spotColor = Orange, ambientColor = Orange)
+                .shadow(14.dp, CircleShape, spotColor = AccentBlue, ambientColor = AccentBlue)
                 .clip(CircleShape)
-                .background(if (detected) Orange else Color(0xFF6A3A1E))
+                .background(if (detected) AccentBlue else Color(0xFF9DB2CF))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center,
         ) { Icon(Icons.Default.Download, "Download", tint = Color.White, modifier = Modifier.size(30.dp)) }
