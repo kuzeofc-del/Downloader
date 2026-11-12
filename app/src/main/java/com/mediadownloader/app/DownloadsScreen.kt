@@ -51,6 +51,7 @@ private val EmptyIcon = Color(0x5994A3C7)
 @Composable
 fun DownloadsScreen() {
     val items by Downloads.items.collectAsState()
+    val navPad = LocalNavBarPad.current
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 14.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Download", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
@@ -67,7 +68,7 @@ fun DownloadsScreen() {
                 Text("Finished files appear in the Files tab", color = SoftText, fontSize = 13.sp)
             }
         } else {
-            LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
+            LazyColumn(contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 4.dp + navPad)) {
                 items(items.asReversed(), key = { it.id }) { DownloadRow(it) }
             }
         }
