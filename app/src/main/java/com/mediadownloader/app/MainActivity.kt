@@ -13,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,8 +54,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
         handleIntent(intent)
         askPermissions()
@@ -122,19 +123,19 @@ fun AppRoot() {
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = {
-                // Píldora flotante de cristal
+                // Píldora flotante de cristal claro
                 val pill = RoundedCornerShape(50)
                 Row(
                     Modifier.fillMaxWidth().navigationBarsPadding()
                         .padding(horizontal = 24.dp, vertical = 10.dp)
-                        .clip(pill).background(Color(0x59000000)).glass(pill)
+                        .clip(pill).background(Color(0x66FFFFFF)).glass(pill)
                         .padding(horizontal = 6.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     NavItem(Tab.HOME, tab, "Home") { Icon(Icons.Default.Home, null) }
                     NavItem(Tab.BROWSER, tab, "Browser") { Icon(Icons.Default.Public, null) }
                     NavItem(Tab.DOWNLOADS, tab, "Download") {
-                        BadgedBox(badge = { if (active > 0) Badge(containerColor = Orange) { Text("$active") } }) {
+                        BadgedBox(badge = { if (active > 0) Badge(containerColor = AccentBlue, contentColor = Color.White) { Text("$active") } }) {
                             Icon(Icons.Default.Download, null)
                         }
                     }
@@ -160,11 +161,14 @@ private fun RowScope.NavItem(
     t: Tab, current: Tab, label: String, icon: @Composable () -> Unit,
 ) {
     val selected = t == current
-    val tint = if (selected) Orange else Color(0xCCFFFFFF)
+    val shape = RoundedCornerShape(50)
+    // Activo: texto/ícono oscuros + resaltado de cristal neutro. Inactivo: gris.
+    val tint = if (selected) InkColor else Muted
     Column(
         Modifier.weight(1f)
-            .clip(RoundedCornerShape(50))
-            .background(if (selected) Color(0x33FF6A13) else Color.Transparent)
+            .clip(shape)
+            .background(if (selected) Color(0x1A1C1C28) else Color.Transparent)
+            .then(if (selected) Modifier.border(0.5.dp, Color(0xB3FFFFFF), shape) else Modifier)
             .clickable { UiBus.tab.value = t }
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
