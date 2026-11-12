@@ -44,7 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val SoftText = androidx.compose.ui.graphics.Color(0xB3FFFFFF)
+private val SoftText = androidx.compose.ui.graphics.Color(0xFF5B6070)
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
@@ -64,7 +64,7 @@ fun SettingsScreen(onBack: () -> Unit) {
 
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = InkColor) }
             Text("Settings", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         }
         LazyColumn(contentPadding = PaddingValues(16.dp)) {
@@ -81,7 +81,10 @@ fun SettingsScreen(onBack: () -> Unit) {
                         listOf(1, 2, 3, 5).forEach { n ->
                             FilterChip(
                                 selected = par == n, onClick = { Prefs.setParallel(n) }, label = { Text("$n") },
-                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Orange, selectedLabelColor = androidx.compose.ui.graphics.Color.White),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AccentBlue,
+                                    selectedLabelColor = androidx.compose.ui.graphics.Color.White,
+                                ),
                             )
                         }
                     }
@@ -116,7 +119,10 @@ fun SettingsScreen(onBack: () -> Unit) {
                         }
                     }
                     if (logged) OutlinedButton(onClick = { Cookies.logout(ctx, site); refresh++ }) { Text("Log out") }
-                    else Button(onClick = { UiBus.openBrowser(site.loginUrl) }, colors = ButtonDefaults.buttonColors(containerColor = Orange)) { Text("Log in") }
+                    else Button(
+                        onClick = { UiBus.openBrowser(site.loginUrl) },
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentBlue, contentColor = androidx.compose.ui.graphics.Color.White),
+                    ) { Text("Log in") }
                 }
                 HorizontalDivider(color = GlassBorder)
             }
@@ -159,7 +165,13 @@ private fun Toggle(title: String, hint: String, checked: Boolean, onChange: (Boo
             Text(title, fontWeight = FontWeight.SemiBold)
             Text(hint, color = SoftText, fontSize = 12.sp)
         }
-        Switch(checked = checked, onCheckedChange = onChange, colors = SwitchDefaults.colors(checkedTrackColor = Orange))
+        Switch(
+            checked = checked, onCheckedChange = onChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = AccentBlue,
+                checkedThumbColor = androidx.compose.ui.graphics.Color.White,
+            ),
+        )
     }
 }
 
