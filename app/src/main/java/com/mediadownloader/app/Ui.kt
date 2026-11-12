@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,7 +25,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,11 +37,18 @@ import coil.compose.AsyncImage
 val Orange = Color(0xFFFF6A13)
 val OrangeSoft = Color(0xFFFF8A3D)
 val Gold = Color(0xFFFFB627)
-val Bg = Color(0xFF111111)
-val Card1 = Color(0xFF1C1C1E)
-val Card2 = Color(0xFF26262A)
-val Muted = Color(0xFFA0A0A8)
+val Bg = Color(0xFF0B0B14)
+val Card1 = Color(0x33FFFFFF)
+val Card2 = Color(0x26FFFFFF)
+val GlassBorder = Color(0x40FFFFFF)
+val Muted = Color(0xFFB0B0BA)
 val Good = Color(0xFF3DDC84)
+
+/** Efecto cristal: relleno translúcido con brillo y borde fino. */
+fun Modifier.glass(shape: Shape = RoundedCornerShape(22.dp)): Modifier = this
+    .clip(shape)
+    .background(Brush.verticalGradient(listOf(Color(0x40FFFFFF), Color(0x14FFFFFF))))
+    .border(1.dp, Brush.verticalGradient(listOf(Color(0x66FFFFFF), Color(0x1AFFFFFF))), shape)
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
@@ -48,24 +58,30 @@ fun AppTheme(content: @Composable () -> Unit) {
             primaryContainer = Color(0xFF3A1E0C), onPrimaryContainer = OrangeSoft,
             secondary = Gold, onSecondary = Color.Black,
             secondaryContainer = Color(0xFF3A1E0C), onSecondaryContainer = OrangeSoft,
-            background = Bg, onBackground = Color(0xFFF2F2F2),
-            surface = Bg, onSurface = Color(0xFFF2F2F2),
+            background = Color.Transparent, onBackground = Color(0xFFF2F2F2),
+            surface = Color.Transparent, onSurface = Color(0xFFF2F2F2),
             surfaceVariant = Card2, onSurfaceVariant = Muted,
-            surfaceContainer = Card1, surfaceContainerHigh = Card2, surfaceContainerHighest = Color(0xFF303035),
-            surfaceContainerLow = Card1, surfaceContainerLowest = Bg,
-            outline = Color(0xFF4A4A50), outlineVariant = Color(0xFF2E2E33),
+            surfaceContainer = Card1, surfaceContainerHigh = Color(0xCC1E1E2C), surfaceContainerHighest = Color(0xE6262636),
+            surfaceContainerLow = Card1, surfaceContainerLowest = Color.Transparent,
+            outline = GlassBorder, outlineVariant = Color(0x26FFFFFF),
             error = Color(0xFFFF6B6B),
         ),
     ) {
-        // Default text/icon colour for every screen, including ones not inside a Scaffold/Surface
-        CompositionLocalProvider(LocalContentColor provides Color(0xFFF2F2F2), content = content)
+        // Fondo con degradado detrás de todas las pantallas (así el cristal se nota)
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.linearGradient(listOf(Bg, Color(0xFF1A1033), Color(0xFF0D2238)))
+            )
+        ) {
+            CompositionLocalProvider(LocalContentColor provides Color(0xFFF2F2F2), content = content)
+        }
     }
 }
 
 /** Thumbnail with play/duration overlay — remote image, local video frame, or a music icon. */
 @Composable
 fun Thumb(model: Any?, audio: Boolean, durationSec: Long, modifier: Modifier) {
-    Box(modifier.clip(RoundedCornerShape(10.dp)).background(Card2)) {
+    Box(modifier.clip(RoundedCornerShape(14.dp)).background(Card2)) {
         if (model != null) {
             AsyncImage(model = model, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         }
@@ -75,8 +91,9 @@ fun Thumb(model: Any?, audio: Boolean, durationSec: Long, modifier: Modifier) {
         if (durationSec > 0 || !audio) {
             Box(
                 Modifier.align(Alignment.BottomStart).padding(5.dp)
-                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(5.dp))
-                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                    .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
+                    .border(0.5.dp, GlassBorder, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.PlayArrow, null, tint = Color.White, modifier = Modifier.size(11.dp))
