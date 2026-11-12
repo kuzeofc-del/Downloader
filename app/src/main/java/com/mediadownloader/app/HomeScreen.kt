@@ -51,8 +51,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -79,6 +79,9 @@ private val DEFAULT_SHORTCUTS = listOf(
     Shortcut("Dailymotion", "https://www.dailymotion.com"),
     Shortcut("Vimeo", "https://vimeo.com/watch"),
 )
+
+private val DialogBg = Color(0xF21E1E2C)
+private val GlassText = Color(0xB3FFFFFF)
 
 object Shortcuts {
     private fun prefs(ctx: Context) = ctx.getSharedPreferences("shortcuts", Context.MODE_PRIVATE)
@@ -109,20 +112,20 @@ fun HomeScreen() {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
         Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 18.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Video Downloader", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-            IconButton(onClick = { UiBus.overlay.value = "settings" }) { Icon(Icons.Default.Settings, "Settings", tint = Muted) }
+            IconButton(onClick = { UiBus.overlay.value = "settings" }) { Icon(Icons.Default.Settings, "Settings", tint = Color.White) }
         }
 
-        // ---- search / link box
+        // ---- search / link box (glass)
         Row(
-            Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(30.dp), spotColor = Orange, ambientColor = Orange)
-                .clip(RoundedCornerShape(30.dp)).background(Color.White).padding(start = 20.dp, end = 6.dp),
+            Modifier.fillMaxWidth().glass(RoundedCornerShape(30.dp)).padding(start = 20.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(Modifier.weight(1f).padding(vertical = 18.dp)) {
-                if (query.isEmpty()) Text("Search video or paste a link…", color = Color(0xFF6B6B70), fontSize = 16.sp)
+                if (query.isEmpty()) Text("Search video or paste a link…", color = GlassText, fontSize = 16.sp)
                 BasicTextField(
                     value = query, onValueChange = { query = it }, singleLine = true,
-                    textStyle = TextStyle(color = Color(0xFF111111), fontSize = 16.sp),
+                    textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+                    cursorBrush = SolidColor(Color.White),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
                     keyboardActions = KeyboardActions(onGo = { UiBus.go(query); query = "" }),
                     modifier = Modifier.fillMaxWidth(),
@@ -130,7 +133,7 @@ fun HomeScreen() {
             }
             if (query.isEmpty()) {
                 IconButton(onClick = { query = clipboard.getText()?.text.orEmpty() }) {
-                    Icon(Icons.Default.ContentPaste, "Paste", tint = Color(0xFF6B6B70))
+                    Icon(Icons.Default.ContentPaste, "Paste", tint = GlassText)
                 }
             }
             Box(
@@ -143,16 +146,16 @@ fun HomeScreen() {
         clipUrl?.let { url ->
             Spacer(Modifier.height(14.dp))
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Card2).padding(14.dp),
+                Modifier.fillMaxWidth().glass(RoundedCornerShape(20.dp)).padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(Icons.Default.Link, null, tint = Orange)
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text("Copied link detected", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text(url, color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(url, color = GlassText, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                TextButton(onClick = { UiBus.clipUrl.value = null }) { Text("Dismiss", color = Muted) }
+                TextButton(onClick = { UiBus.clipUrl.value = null }) { Text("Dismiss", color = GlassText) }
                 Button(
                     onClick = { UiBus.clipUrl.value = null; UiBus.sheet.value = SheetRequest(url) },
                     colors = ButtonDefaults.buttonColors(containerColor = Orange),
@@ -160,9 +163,9 @@ fun HomeScreen() {
             }
         }
 
-        // ---- site shortcuts
+        // ---- site shortcuts (glass)
         Spacer(Modifier.height(18.dp))
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Card1).padding(vertical = 18.dp, horizontal = 6.dp)) {
+        Column(Modifier.fillMaxWidth().glass(RoundedCornerShape(28.dp)).padding(vertical = 18.dp, horizontal = 6.dp)) {
             FlowRow(Modifier.fillMaxWidth(), maxItemsInEachRow = 4, horizontalArrangement = Arrangement.SpaceEvenly) {
                 (DEFAULT_SHORTCUTS + custom).forEach { s ->
                     ShortcutTile(
@@ -175,28 +178,18 @@ fun HomeScreen() {
                     Modifier.width(80.dp).padding(vertical = 8.dp).clip(RoundedCornerShape(12.dp)).clickable { showAdd = true },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Box(Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(Card2), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(Card2), contentAlignment = Alignment.Center) {
                         Icon(Icons.Default.Add, "Add", tint = Color.White)
                     }
                     Spacer(Modifier.height(6.dp))
-                    Text("Add", fontSize = 12.sp, color = Color(0xFFDADADA))
+                    Text("Add", fontSize = 12.sp, color = Color(0xFFEDEDED))
                 }
             }
         }
 
-        // ---- how to
-        Spacer(Modifier.height(18.dp))
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Card1).padding(16.dp)) {
-            Text("How to download", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(Modifier.height(8.dp))
-            Step("1", "Tap a site above or search — it opens in the built-in browser")
-            Step("2", "Play the video — the orange ⬇ button lights up")
-            Step("3", "Tap ⬇, pick a quality, then Download")
-            Step("★", "Or use Share ▸ Download from any app, or just copy a link and come back here")
-        }
         Text(
             "$engine  •  Save: Download/$SAVE_FOLDER",
-            color = Muted, fontSize = 11.sp, modifier = Modifier.padding(vertical = 14.dp),
+            color = GlassText, fontSize = 11.sp, modifier = Modifier.padding(vertical = 14.dp),
         )
     }
 
@@ -215,23 +208,10 @@ fun HomeScreen() {
                 }) { Text("Remove", color = Orange) }
             },
             dismissButton = { TextButton(onClick = { removeTarget = null }) { Text("Cancel") } },
-            containerColor = Card1,
+            containerColor = DialogBg,
         )
     }
 }
-
-@Composable
-private fun Step(n: String, text: String) {
-    Row(Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(22.dp).clip(CircleShape).background(MaterialThemeOrangeContainer), contentAlignment = Alignment.Center) {
-            Text(n, color = Orange, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.width(10.dp))
-        Text(text, color = Color(0xFFD0D0D5), fontSize = 14.sp)
-    }
-}
-
-private val MaterialThemeOrangeContainer = Color(0xFF3A1E0C)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -242,7 +222,7 @@ private fun ShortcutTile(s: Shortcut, onClick: () -> Unit, onLongClick: () -> Un
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         var loaded by remember { mutableStateOf(false) }
-        Box(Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(Card2), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(Card2), contentAlignment = Alignment.Center) {
             if (!loaded) Text(s.name.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             // The site's own favicon, like any browser's speed-dial
             AsyncImage(
@@ -253,7 +233,7 @@ private fun ShortcutTile(s: Shortcut, onClick: () -> Unit, onLongClick: () -> Un
             )
         }
         Spacer(Modifier.height(6.dp))
-        Text(s.name, fontSize = 12.sp, color = Color(0xFFDADADA), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(s.name, fontSize = 12.sp, color = Color(0xFFEDEDED), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -263,7 +243,7 @@ private fun AddShortcutDialog(onDismiss: () -> Unit, onAdd: (Shortcut) -> Unit) 
     var url by remember { mutableStateOf(Browser.url.value.ifBlank { "https://" }) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Card1,
+        containerColor = DialogBg,
         title = { Text("Add a site") },
         text = {
             Column {
