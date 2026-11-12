@@ -100,20 +100,20 @@ fun QualitySheet(req: SheetRequest, onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Card1,
+        containerColor = Color(0xFAF4F7FF),
         dragHandle = null,
     ) {
         Column(Modifier.navigationBarsPadding().padding(bottom = 12.dp)) {
             Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Select Download Quality", fontSize = 19.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Close", tint = Color.White) }
+                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Close", tint = InkColor) }
             }
             when (val s = state) {
                 LoadState.Loading -> Column(
                     Modifier.fillMaxWidth().padding(vertical = 48.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CircularProgressIndicator(color = Orange)
+                    CircularProgressIndicator(color = AccentBlue)
                     Spacer(Modifier.height(14.dp))
                     Text("Finding video…", color = Muted)
                     Text(Cookies.hostOf(target.first) ?: "", color = Muted, fontSize = 12.sp)
@@ -166,16 +166,16 @@ private fun ReadyView(
 
     Header(info)
     if (req.alternatives.isNotEmpty()) CandidateRow(req, current, onPick)
-    HorizontalDivider(color = Card2)
+    HorizontalDivider(color = GlassBorder)
     TabRow(
-        selectedTabIndex = tab, containerColor = Card1, contentColor = Orange,
-        indicator = { pos -> TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(pos[tab]), color = Orange, height = 3.dp) },
-        divider = { HorizontalDivider(color = Card2) },
+        selectedTabIndex = tab, containerColor = Color.Transparent, contentColor = AccentBlue,
+        indicator = { pos -> TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(pos[tab]), color = AccentBlue, height = 3.dp) },
+        divider = { HorizontalDivider(color = GlassBorder) },
     ) {
         Tab(selected = tab == 0, onClick = { tab = 0; info.video.firstOrNull()?.let { selected = it } },
-            text = { Text("Video", fontSize = 16.sp, color = if (tab == 0) Orange else Muted) })
+            text = { Text("Video", fontSize = 16.sp, color = if (tab == 0) AccentBlue else Muted) })
         Tab(selected = tab == 1, onClick = { tab = 1; selected = info.audio.first() },
-            text = { Text("Audio", fontSize = 16.sp, color = if (tab == 1) Orange else Muted) })
+            text = { Text("Audio", fontSize = 16.sp, color = if (tab == 1) AccentBlue else Muted) })
     }
     val options = if (tab == 0) info.video else info.audio
     LazyColumn(Modifier.heightIn(max = 330.dp)) {
@@ -187,8 +187,8 @@ private fun ReadyView(
                 Modifier.fillMaxWidth().clickable { selected = opt }.padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(Modifier.size(38.dp).clip(RoundedCornerShape(8.dp)).background(Card2), contentAlignment = Alignment.Center) {
-                    Icon(if (opt.isAudio) Icons.Default.MusicNote else Icons.Default.PlayCircle, null, tint = Color(0xFFBDBDC2))
+                Box(Modifier.size(38.dp).clip(RoundedCornerShape(8.dp)).background(TrackColor), contentAlignment = Alignment.Center) {
+                    Icon(if (opt.isAudio) Icons.Default.MusicNote else Icons.Default.PlayCircle, null, tint = Muted)
                 }
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
@@ -196,16 +196,16 @@ private fun ReadyView(
                     if (!info.isPlaylist) Text(if (opt.size > 0) "~ " + humanSize(opt.size) else "Size unknown", color = Muted, fontSize = 13.sp)
                 }
                 RadioButton(selected = selected == opt, onClick = { selected = opt },
-                    colors = RadioButtonDefaults.colors(selectedColor = Orange, unselectedColor = Muted))
+                    colors = RadioButtonDefaults.colors(selectedColor = AccentBlue, unselectedColor = Muted))
             }
-            HorizontalDivider(color = Card2, modifier = Modifier.padding(horizontal = 20.dp))
+            HorizontalDivider(color = GlassBorder, modifier = Modifier.padding(horizontal = 20.dp))
         }
     }
     if (listUrl || info.isPlaylist) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(if (info.isPlaylist) "Whole playlist (${info.count})" else "Download the whole playlist", modifier = Modifier.weight(1f))
             Switch(checked = wholePlaylist, onCheckedChange = { wholePlaylist = it },
-                colors = SwitchDefaults.colors(checkedTrackColor = Orange))
+                colors = SwitchDefaults.colors(checkedTrackColor = AccentBlue))
         }
     }
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -214,13 +214,13 @@ private fun ReadyView(
             enabled = !wholePlaylist,
             modifier = Modifier.weight(1f).height(54.dp),
             shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = Card2, contentColor = Color.White),
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0x66FFFFFF), contentColor = InkColor),
         ) { Text("Rename", fontSize = 16.sp) }
         Button(
             onClick = { onDownload(selected, name, wholePlaylist) },
             modifier = Modifier.weight(2f).height(54.dp),
             shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Orange),
+            colors = ButtonDefaults.buttonColors(containerColor = AccentBlue),
         ) { Text("Download", fontSize = 17.sp, fontWeight = FontWeight.SemiBold) }
     }
     name?.let { Text("Name: $it", color = Muted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 24.dp)) }
@@ -229,10 +229,10 @@ private fun ReadyView(
         var text by remember { mutableStateOf(name ?: info.title) }
         AlertDialog(
             onDismissRequest = { renaming = false },
-            containerColor = Card1,
+            containerColor = Color(0xF5FFFFFF),
             title = { Text("File name") },
             text = { OutlinedTextField(text, { text = it }, singleLine = false, maxLines = 3) },
-            confirmButton = { TextButton(onClick = { name = text.trim().ifBlank { null }; renaming = false }) { Text("OK", color = Orange) } },
+            confirmButton = { TextButton(onClick = { name = text.trim().ifBlank { null }; renaming = false }) { Text("OK", color = AccentBlue) } },
             dismissButton = { TextButton(onClick = { renaming = false }) { Text("Cancel") } },
         )
     }
@@ -245,7 +245,7 @@ private fun CandidateRow(req: SheetRequest, current: String, onPick: (String) ->
     Column(Modifier.padding(horizontal = 20.dp, vertical = 2.dp)) {
         Text(
             if (open) "Hide other videos ▴" else "Not this video? ▾",
-            color = Orange, fontSize = 13.sp,
+            color = AccentBlue, fontSize = 13.sp,
             modifier = Modifier.clickable { open = !open }.padding(vertical = 4.dp),
         )
         AnimatedVisibility(open) {
@@ -254,7 +254,7 @@ private fun CandidateRow(req: SheetRequest, current: String, onPick: (String) ->
                     val label = if (i == 0) "Detected video (recommended)" else "Other video $i — ${Cookies.hostOf(u) ?: ""}"
                     Text(
                         (if (u == current) "● " else "○ ") + label,
-                        color = if (u == current) Orange else Color(0xFFD0D0D5), fontSize = 13.sp,
+                        color = if (u == current) AccentBlue else Muted, fontSize = 13.sp,
                         modifier = Modifier.fillMaxWidth().clickable { onPick(u) }.padding(vertical = 6.dp),
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
@@ -284,13 +284,13 @@ private fun FailedView(
         }
         if (!e.drm) {
             Text(
-                if (details) "Hide details ▴" else "Details ▾", color = Orange, fontSize = 13.sp,
+                if (details) "Hide details ▴" else "Details ▾", color = AccentBlue, fontSize = 13.sp,
                 modifier = Modifier.padding(top = 8.dp).clickable { details = !details },
             )
             AnimatedVisibility(details) {
                 Text(
                     e.detail, color = Muted, fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 6.dp).fillMaxWidth().background(Card2, RoundedCornerShape(8.dp)).padding(10.dp),
+                    modifier = Modifier.padding(top = 6.dp).fillMaxWidth().background(TrackColor, RoundedCornerShape(8.dp)).padding(10.dp),
                 )
             }
         }
@@ -308,7 +308,7 @@ private fun FailedView(
                 }
             }
             if (!e.drm) {
-                Button(onClick = onRetry, shape = RoundedCornerShape(24.dp), colors = ButtonDefaults.buttonColors(containerColor = Orange)) {
+                Button(onClick = onRetry, shape = RoundedCornerShape(24.dp), colors = ButtonDefaults.buttonColors(containerColor = AccentBlue)) {
                     Text("Retry")
                 }
             }
@@ -316,4 +316,4 @@ private fun FailedView(
     }
 }
 
-private val MaterialErrorRed = Color(0xFFFF6B6B)
+private val MaterialErrorRed = DangerRed
